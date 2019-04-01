@@ -1,31 +1,68 @@
 Page, .page {
     width: 100%;
     height: 100%;
-    background-color: #D18744;
-    color: #f2ad6f;
+    font-size: 8px;
+    background-color: #080808;
+    color: #fff;
     .image {
         width: 100%;
     }
 }
 .section {
-    color: #ffdfc3;
+    // color: #ffdfc3;
     font-size: 1rem;
     padding: 20px;
     margin: 20px 0;
     .main-num {
         font-size: 1.8rem;  
-        Text {
-            font-size: 0.6rem;
-            margin-left: 10px;
-            color: #FFCA9A;
-        }
       }
     .second-num {
         font-size: 0.9rem;
         Text {
             font-size: 0.6rem;
             margin-left: 10px;
-            color: #FFCA9A;
+            // color: #FFCA9A;
+        }
+    }
+}
+.temperature-section {
+    position: relative;
+    height: 100vh;
+    background-color: #080808;
+    background-image: url('https://wpimg.wallstcn.com/c07e14e2-2ae8-4110-92b9-f174356226c8.png');
+    background-size: contain;
+    background-position: right;
+    background-repeat: no-repeat;
+    color: #fff;
+    .temperature-num {
+        font-size: 56px;
+        margin: 50px 0;
+        .main-num {
+            // font-weight: 900;
+            font-size: 2.8rem;  
+            Text {
+                font-size: 0.6rem;
+                margin-left: 10px;
+            }
+          }
+        .second-num {
+            margin-bottom: 10px;
+        }
+        
+    }
+    .location-wrapper {
+        position: absolute;
+        bottom: 200px;
+        right: 50px;
+        .location-date {
+            // font-weight: 900;
+            font-size: 1.5rem;
+        }
+        .location {
+            font-size: 0.7rem;
+            &:last-child{
+                font-size: 0.6rem;
+            }
         }
     }
 }
@@ -35,10 +72,4 @@ Page, .page {
     View {
         width: 33%;
     }
-}
-
-.location {
-    color: #FFCA9A;
-    float: right;
-    margin: 50px 0;
 }

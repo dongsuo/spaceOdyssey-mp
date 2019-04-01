@@ -1,19 +1,36 @@
-.page, Page {
+.page {
     width: 100%;
-    height: 100%;
-    background-color: #D18744;
-    color: #ffdfc3;
+    height: 100vh;
+    background-image: url('https://wpimg.wallstcn.com/4b3dce1b-0693-4437-a096-38295ece2a4b.jpg');
+    // background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-color: #000;
+    color: #fff;
     text-align: center;
+    padding-top: 80px;
 }
+
+View .header {
+    color: #fff;
+    -webkit-text-stroke: #000;
+    font-size: 1.6rem;
+    margin: 20px 0;
+}
+
 View View {
     font-size: 0.8rem;
-    line-height: 1.5;
+    line-height: 2;
 }
-View .header {
-    font-size: 1.6rem;
-    margin: 50px 0;
+
+View .thanks-header {
+    color: #fff;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
 }
-.text-section {
+.about-section {
+    background-color: rgba(0,0,0, 0.4);
+    border-radius: 10px;
+    padding: 20px;
     margin: 0 auto;
-    width: 75%;
+    width: 85%;
 }
