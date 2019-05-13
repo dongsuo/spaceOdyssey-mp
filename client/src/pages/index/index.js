@@ -1,19 +1,19 @@
 import Taro, { Component } from "@tarojs/taro";
 import { View, Text } from "@tarojs/components";
 import windLevel, { windDir } from "./map";
+import {fetch} from '../../utils'
 import "./index.scss";
 
-const PROXY_API = "https://dongsuo.leanapp.cn/proxy";
+const baseUrl = "https://service-23vd7572-1252006172.gz.apigw.tencentcs.com/release/"
 
-const IMAGE_API = `${PROXY_API}?url=https://api.unsplash.com/photos/random&client_id=e6f2095f8250387649ad01af8ef8fb94b19635ed602da9b67aa961810130d1aa&collections=1111575`;
-
-const MARS_WEATHER_API = `${PROXY_API}?url=https://mars.nasa.gov/rss/api/&feed=weather&category=insight&feedtype=json&ver=1.0`;
 
 function getNASAImage(that) {
-  Taro.request({
-    url: IMAGE_API
+  fetch({
+    url: 'https://api.unsplash.com/photos/random',
+    client_id: 'e6f2095f8250387649ad01af8ef8fb94b19635ed602da9b67aa961810130d1aa',
+    collections: '1111575'
   }).then(resp => {
-    if (resp.statusCode !== 200) {
+    if (!resp || resp.urls.small !== 200) {
       that.setState({
         imageUrl:
           "https://wpimg.wallstcn.com/c04f1938-9ec4-423f-9ac5-aa154d0bfe0e.jpg",
@@ -21,8 +21,8 @@ function getNASAImage(that) {
       });
     } else {
       that.setState({
-        imageUrl: resp.data.urls.small,
-        imageDesc: resp.data.description || resp.data.alt_description
+        imageUrl: resp.urls.small,
+        imageDesc: resp.description || resp.alt_description
       });
     }
   });
@@ -30,6 +30,8 @@ function getNASAImage(that) {
 
 function windLevelCal(speed) {
   let levelResult;
+  // 取一位小数
+  speed = Math.round(speed*10)/10
   windLevel.forEach(level => {
     if (speed >= level.speed[0] && speed <= level.speed[1]) {
       levelResult = level.level;
@@ -46,11 +48,11 @@ export default class Index extends Component {
     return {
       title: `${
         this.state.today
-      }火星平均气温：${this.state.todayWeather.data.AT.av.toFixed(1)}，${
+        }火星平均气温：${this.state.todayWeather.data.AT.av.toFixed(1)}，${
         windDir[this.state.todayWeather.data.WD.most_common.compass_point]
-      }风${windLevelCal(this.state.todayWeather.data.HWS.mn)}-${windLevelCal(
-        this.state.todayWeather.data.HWS.mx
-      )}级`,
+        }风${windLevelCal(this.state.todayWeather.data.HWS.mn)}-${windLevelCal(
+          this.state.todayWeather.data.HWS.mx
+        )}级`,
       imageUrl: this.state.imageUrl
     };
   }
@@ -73,30 +75,44 @@ export default class Index extends Component {
       backgroundColor: "#505050",
       frontColor: "#ffffff"
     });
-
-    getNASAImage(this);
-
     Taro.showLoading();
-    Taro.request({
-      url: MARS_WEATHER_API
+    fetch({
+      url: baseUrl + 'solDate'
     }).then(resp => {
-      Taro.hideLoading();
-      const sol = resp.data.sol_keys.slice(-1)[0];
-      const month = new Date(resp.data[sol].First_UTC).getMonth() + 1;
-      const date = new Date(
-        +new Date(resp.data[sol].First_UTC) + 8 * 3600 * 1000
-      ).getDate();
+      // console.log(resp)
+      const data = resp.sort((a,b) => {
+        return a.sol-b.sol
+      })
+      const sol = data.pop();
+      const month = new Date(sol.first_utc).getMonth() + 1;
+      const date = new Date(sol.first_utc).getDate();
 
-      this.setState({
-        today: month + "月" + date + "日"
-      });
       this.setState({
         todayWeather: {
-          sol: sol,
-          data: resp.data[sol]
-        }
+          sol: sol.sol
+        },
+        today: month + "月" + date + "日"
       });
-    });
+      fetch({
+        url: 'https://service-nqach5fs-1252006172.gz.apigw.tencentcs.com/release/marsTemperature',
+        start: sol.sol
+      }).then(resp => {
+        // console.log(resp)
+        Taro.hideLoading();
+        const data = {
+          PRE: resp.pre[0],
+          AT: resp.temperature[0],
+          WD: resp.wind[0],
+          mostCommonWind: resp.mostCommonWind
+        }
+        this.setState({
+          todayWeather: {
+            data
+          }
+        })
+      })
+    })
+    getNASAImage(this);
   }
 
   render() {
@@ -108,7 +124,7 @@ export default class Index extends Component {
               <View className='temperature-num'>
                 <View className='main-num'>
                   {this.state.todayWeather.data.AT.av.toFixed(1)}℃
-                  <Text>平均</Text>
+                  <Text className='sm-text'>平均</Text>
                 </View>
                 <View className='second-num'>
                   {this.state.todayWeather.data.AT.mx.toFixed(1)}℃ ~{" "}
@@ -117,11 +133,11 @@ export default class Index extends Component {
                 <View className='second-num'>
                   {
                     windDir[
-                      this.state.todayWeather.data.WD.most_common.compass_point
+                    this.state.todayWeather.data.mostCommonWind.compass_point
                     ]
                   }
-                  风 {windLevelCal(this.state.todayWeather.data.HWS.mn)}-
-                  {windLevelCal(this.state.todayWeather.data.HWS.mx)}级
+                  风 {windLevelCal(this.state.todayWeather.data.WD.mn)}-
+                  {windLevelCal(this.state.todayWeather.data.WD.mx)}级
                 </View>
               </View>
               <View className='location-wrapper'>
@@ -145,13 +161,13 @@ export default class Index extends Component {
                 <View>风速</View>
                 <View className='wd-section'>
                   <View className='second-num'>
-                    {this.state.todayWeather.data.HWS.mx}m/s<Text>最高</Text>
+                    {this.state.todayWeather.data.WD.mx}m/s<Text>最高</Text>
                   </View>
                   <View className='second-num'>
-                    {this.state.todayWeather.data.HWS.mn}m/s<Text>最低</Text>
+                    {this.state.todayWeather.data.WD.mn}m/s<Text>最低</Text>
                   </View>
                   <View className='second-num'>
-                    {this.state.todayWeather.data.HWS.av}m/s<Text>平均</Text>
+                    {this.state.todayWeather.data.WD.av}m/s<Text>平均</Text>
                   </View>
                 </View>
               </frameElement>
@@ -163,13 +179,13 @@ export default class Index extends Component {
           {this.state.todayWeather.data && (
             <View className='wd-section'>
               <View className='second-num'>
-                {this.state.todayWeather.data.PRE.mx}Pa<Text>最高</Text>
+                {this.state.todayWeather.data.PRE.mx.toFixed(2)}Pa<Text>最高</Text>
               </View>
               <View className='second-num'>
-                {this.state.todayWeather.data.PRE.mn}Pa<Text>最低</Text>
+                {this.state.todayWeather.data.PRE.mn.toFixed(2)}Pa<Text>最低</Text>
               </View>
               <View className='second-num'>
-                {this.state.todayWeather.data.PRE.av}Pa<Text>平均</Text>
+                {this.state.todayWeather.data.PRE.av.toFixed(2)}Pa<Text>平均</Text>
               </View>
             </View>
           )}

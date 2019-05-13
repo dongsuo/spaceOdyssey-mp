@@ -1,6 +1,6 @@
 const config = {
-  projectName: 'marsWeather',
-  date: '2019-2-24',
+  projectName: 'SapceOdessy-mp-cloud',
+  date: '2019-4-27',
   designWidth: 750,
   deviceRatio: {
     '640': 2.34 / 2,
