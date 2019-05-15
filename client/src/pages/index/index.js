@@ -4,7 +4,7 @@ import windLevel, { windDir } from "./map";
 import {fetch} from '../../utils'
 import "./index.scss";
 
-const baseUrl = "https://service-23vd7572-1252006172.gz.apigw.tencentcs.com/release/"
+const baseUrl = "https://1314521.ml/release/"
 
 
 function getNASAImage(that) {
@@ -76,11 +76,10 @@ export default class Index extends Component {
       frontColor: "#ffffff"
     });
     Taro.showLoading();
-    fetch({
+    Taro.request({
       url: baseUrl + 'solDate'
-    }).then(resp => {
-      // console.log(resp)
-      const data = resp.sort((a,b) => {
+    }).then(resp => {      
+      const data = JSON.parse(resp.data.body).sort((a,b) => {
         return a.sol-b.sol
       })
       const sol = data.pop();
@@ -93,17 +92,15 @@ export default class Index extends Component {
         },
         today: month + "月" + date + "日"
       });
-      fetch({
-        url: 'https://service-nqach5fs-1252006172.gz.apigw.tencentcs.com/release/marsTemperature',
-        start: sol.sol
+      Taro.request({
+        url: baseUrl + 'mars_weather?start=' + sol.sol
       }).then(resp => {
-        // console.log(resp)
         Taro.hideLoading();
         const data = {
-          PRE: resp.pre[0],
-          AT: resp.temperature[0],
-          WD: resp.wind[0],
-          mostCommonWind: resp.mostCommonWind
+          PRE: resp.data.pre[0],
+          AT: resp.data.temperature[0],
+          WD: resp.data.wind[0],
+          mostCommonWind: resp.data.mostCommonWind
         }
         this.setState({
           todayWeather: {

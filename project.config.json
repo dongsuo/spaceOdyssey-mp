@@ -1,7 +1,7 @@
 {
 	"miniprogramRoot": "client/dist/",
 	"cloudfunctionRoot": "cloud/functions/",
-	"projectname": "SapceOdyssey",
+	"projectname": "spaceOdyssey-mp",
 	"description": "",
 	"appid": "wxe5d2de6cf0e30c19",
 	"setting": {
